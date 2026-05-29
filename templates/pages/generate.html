@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}Gerar Prompt{% endblock %}
+
+{% block content %}
+<div
+  x-data="generateApp()"
+  class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+>
+
+  <!-- Page header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">⚡ Gerar Super Prompt</h1>
+    <p class="text-gray-500 text-sm mt-1">Descreva sua ideia e o CHRONUS gera a especificação técnica completa.</p>
+  </div>
+
+  <!-- Layout: mobile stack / desktop split -->
+  <div class="flex flex-col lg:flex-row gap-6">
+
+    <!-- ── INPUT PANEL ── -->
+    <div class="w-full lg:w-2/5 flex flex-col gap-4">
+
+      <!-- Idea textarea -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Sua ideia de aplicativo
+        </label>
+        <textarea
+          x-model="idea"
+          @input="autoResize($event.target)"
+          placeholder="Ex: Quero um CRM para escritório contábil com gestão de clientes, Kanban de tarefas, geração de relatórios em PDF e integração com WhatsApp..."
+          class="w-full min-h-[140px] max-h-[300px] resize-none text-sm text-gray-800 placeholder-gray-400 border-none outline-none leading-relaxed"
+          maxlength="2000"
+          :disabled="isGenerating"
+        ></textarea>
+        <div class="flex justify-end mt-2">
+          <span class="text-xs text-gray-400" x-text="`${idea.length}/2000`"></span>
+        </div>
+      </div>
+
+      <!-- Stack selector -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stack alvo</label>
+        <div class="flex flex-wrap gap-2">
+          <template x-for="s in stacks" :key="s">
+            <button
+              @click="stack = s"
+              :class="stack === s
+                ? 'bg-blue-900 text-white border-blue-900'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-900 hover:text-blue-900'"
+              class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
+              x-text="s"
+              :disabled="isGenerating"
+            ></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Complexity selector -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Complexidade</label>
+        <div class="grid grid-cols-3 gap-2">
+          <template x-for="opt in complexities" :key="opt.value">
+            <button
+              @click="complexity = opt.value"
+              :class="complexity === opt.value
+                ? 'border-orange-500 bg-orange-50 text-orange-700'
+                : 'border-gray-200 text-gray-600 hover:border-orange-300'"
+              class="flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-colors text-center"
+              :disabled="isGenerating"
+            >
+              <span x-text="opt.icon" class="text-lg"></span>
+              <span class="text-xs font-semibold" x-text="opt.label"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Focus tags -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Focos adicionais</label>
+        <div class="flex flex-wrap gap-2">
+          <template x-for="f in focusOptions" :key="f">
+            <button
+              @click="toggleFocus(f)"
+              :class="focus.includes(f)
+                ? 'bg-blue-900 text-white border-blue-900'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-blue-900'"
+              class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
+              x-text="f"
+              :disabled="isGenerating"
+            ></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Generate button -->
+      <button
+        @click="generate()"
+        :disabled="!idea.trim() || isGenerating"
+        :class="(!idea.trim() || isGenerating)
+          ? 'opacity-50 cursor-not-allowed bg-gray-400'
+          : 'bg-accent hover:bg-orange-600 active:scale-95'"
+        class="w-full py-3.5 rounded-xl text-white font-bold text-base transition-all flex items-center justify-center gap-2 shadow-md"
+      >
+        <span x-show="!isGenerating">⚡ Gerar Super Prompt</span>
+        <span x-show="isGenerating" class="flex items-center gap-2">
+          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          Gerando... <span x-text="`Seção ${currentSection}/12`" class="text-orange-200 text-sm"></span>
+        </span>
+      </button>
+
+      <!-- Progress bar (visible during generation) -->
+      <div x-show="isGenerating" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div class="flex justify-between text-xs text-gray-500 mb-2">
+          <span>Progresso</span>
+          <span x-text="`${Math.round((currentSection/12)*100)}%`"></span>
+        </div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-accent transition-all duration-500 rounded-full"
+            :style="`width: ${(currentSection/12)*100}%`"
+          ></div>
+        </div>
+        <div class="mt-3 grid grid-cols-6 gap-1">
+          <template x-for="n in 12" :key="n">
+            <div
+              :class="n <= currentSection ? 'bg-accent' : 'bg-gray-100'"
+              class="h-1.5 rounded-full transition-colors duration-300"
+              :title="`Seção ${n}`"
+            ></div>
+          </template>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── OUTPUT PANEL ── -->
+    <div class="w-full lg:w-3/5">
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full flex flex-col">
+
+        <!-- Output header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-sm font-semibold text-gray-700">Super Prompt</span>
+          <div class="flex items-center gap-2" x-show="output.length > 0">
+            <button
+              @click="copyAll()"
+              class="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-900 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              📋 Copiar
+            </button>
+            <button
+              @click="downloadMd()"
+              class="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-900 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              ⬇ .md
+            </button>
+            <a
+              :href="promptId ? `/prompts/${promptId}/` : '#'"
+              x-show="promptId"
+              class="flex items-center gap-1 text-xs text-blue-900 font-medium px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
+            >
+              👁 Ver prompt
+            </a>
+          </div>
+        </div>
+
+        <!-- Output body -->
+        <div class="flex-1 overflow-y-auto p-4 min-h-[400px] lg:min-h-0">
+
+          <!-- Empty state -->
+          <div
+            x-show="!output && !isGenerating"
+            class="h-full flex flex-col items-center justify-center text-center py-16"
+          >
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+              <span class="text-3xl">⚡</span>
+            </div>
+            <p class="text-gray-500 font-medium">Seu Super Prompt aparecerá aqui</p>
+            <p class="text-gray-400 text-sm mt-1">Descreva sua ideia e clique em Gerar</p>
+          </div>
+
+          <!-- Skeleton durante geração (antes do primeiro chunk) -->
+          <div x-show="isGenerating && !output" class="space-y-3">
+            <template x-for="i in 8" :key="i">
+              <div class="h-4 bg-gray-100 rounded animate-pulse" :style="`width: ${60 + Math.random()*35}%`"></div>
+            </template>
+          </div>
+
+          <!-- Output renderizado -->
+          <div
+            x-show="output"
+            x-html="renderedOutput"
+            :class="isGenerating ? 'streaming' : ''"
+            class="prose-chronus text-sm leading-relaxed"
+          ></div>
+
+        </div>
+
+        <!-- Refinement chat (pós-geração) -->
+        <div
+          x-show="promptId && !isGenerating"
+          class="border-t border-gray-100 p-3"
+          x-transition
+        >
+          <div class="flex gap-2">
+            <input
+              x-model="refinementMessage"
+              @keydown.enter="refine()"
+              placeholder="Refinar: 'Adicione Celery', 'Remova React'..."
+              class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-blue-900 transition-colors"
+            >
+            <button
+              @click="refine()"
+              :disabled="!refinementMessage.trim() || isRefining"
+              class="px-3 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 disabled:opacity-50 transition-colors"
+            >
+              <span x-show="!isRefining">→</span>
+              <span x-show="isRefining" class="animate-spin">⟳</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function generateApp() {
+  return {
+    idea: '',
+    stack: 'Django',
+    complexity: 'complete',
+    focus: [],
+    output: '',
+    isGenerating: false,
+    isRefining: false,
+    currentSection: 0,
+    promptId: null,
+    refinementMessage: '',
+
+    stacks: ['Django', 'Next.js', 'FastAPI', 'Laravel', 'NestJS', 'Rails'],
+    complexities: [
+      { value: 'mvp', label: 'MVP', icon: '🚀' },
+      { value: 'complete', label: 'Completo', icon: '⚙️' },
+      { value: 'enterprise', label: 'Enterprise', icon: '🏢' },
+    ],
+    focusOptions: ['Segurança', 'Performance', 'UX/UI', 'Mobile', 'APIs', 'Testes'],
+
+    get renderedOutput() {
+      return this.markdownToHtml(this.output);
+    },
+
+    toggleFocus(f) {
+      if (this.focus.includes(f)) {
+        this.focus = this.focus.filter(x => x !== f);
+      } else {
+        this.focus.push(f);
+      }
+    },
+
+    autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 300) + 'px';
+    },
+
+    async generate() {
+      if (!this.idea.trim() || this.isGenerating) return;
+      this.isGenerating = true;
+      this.output = '';
+      this.currentSection = 0;
+      this.promptId = null;
+
+      const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+      try {
+        const response = await fetch('/api/prompts/generate/stream/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({
+            idea: this.idea,
+            stack: this.stack,
+            complexity: this.complexity,
+            focus: this.focus,
+          }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (!data.trim()) continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.error) {
+                  showToast(parsed.error, 'error');
+                  this.isGenerating = false;
+                  return;
+                }
+                if (parsed.prompt_id) {
+                  this.promptId = parsed.prompt_id;
+                }
+              } catch {
+                // chunk de texto normal
+                this.output += data;
+                this.detectSection(data);
+              }
+            } else if (line.startsWith('event: done')) {
+              // stream concluído
+            } else if (line.startsWith('event: error')) {
+              showToast('Erro durante a geração.', 'error');
+            }
+          }
+        }
+
+        showToast('Super Prompt gerado com sucesso!', 'success');
+      } catch (err) {
+        showToast('Erro de conexão. Tente novamente.', 'error');
+        console.error(err);
+      } finally {
+        this.isGenerating = false;
+        this.currentSection = 12;
+      }
+    },
+
+    detectSection(chunk) {
+      const sectionMatch = chunk.match(/SEÇÃO\s+(\d+)/i);
+      if (sectionMatch) {
+        const num = parseInt(sectionMatch[1]);
+        if (num > this.currentSection) {
+          this.currentSection = num;
+        }
+      }
+    },
+
+    async refine() {
+      if (!this.refinementMessage.trim() || this.isRefining) return;
+      this.isRefining = true;
+      const msg = this.refinementMessage;
+      this.refinementMessage = '';
+
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        const res = await fetch(`/api/prompts/${this.promptId}/refine/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json();
+        if (data.response) {
+          this.output = data.response;
+          showToast('Prompt refinado!', 'success');
+        }
+      } catch {
+        showToast('Erro ao refinar o prompt.', 'error');
+      } finally {
+        this.isRefining = false;
+      }
+    },
+
+    copyAll() {
+      navigator.clipboard.writeText(this.output)
+        .then(() => showToast('Copiado para o clipboard!', 'success'))
+        .catch(() => showToast('Erro ao copiar.', 'error'));
+    },
+
+    downloadMd() {
+      const blob = new Blob([this.output], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'super-prompt-chronus.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    markdownToHtml(md) {
+      if (!md) return '';
+      let html = md
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^={3,}(.*)={3,}$/gm, '<hr><strong class="text-blue-900">$1</strong><hr>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^\s*[-•]\s+(.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)\n(?!<li>)/gs, '<ul>$1</ul>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      return html;
+    },
+  };
+}
+</script>
+{% endblock %}

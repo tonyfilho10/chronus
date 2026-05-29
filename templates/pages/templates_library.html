@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Templates{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">🗂 Templates</h1>
+    <p class="text-gray-500 text-sm mt-1">Modelos oficiais e da comunidade para acelerar sua geração.</p>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="flex overflow-x-auto gap-2 mb-6 pb-1">
+    <a href="?cat="
+       class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-colors {% if not request.GET.cat %}bg-blue-900 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-blue-900 hover:text-blue-900{% endif %}">
+      Todos
+    </a>
+    {% for cat_value, cat_label in categories %}
+    <a href="?cat={{ cat_value }}"
+       class="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-colors {% if request.GET.cat == cat_value %}bg-blue-900 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:border-blue-900 hover:text-blue-900{% endif %}">
+      {{ cat_label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if templates %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for tpl in templates %}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+      <div class="p-5 flex-1">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0
+            {% if tpl.category == 'crm' %}bg-blue-50
+            {% elif tpl.category == 'saas' %}bg-purple-50
+            {% elif tpl.category == 'ecommerce' %}bg-green-50
+            {% else %}bg-orange-50{% endif %}">
+            {% if tpl.category == 'crm' %}🤝
+            {% elif tpl.category == 'erp' %}🏭
+            {% elif tpl.category == 'saas' %}☁️
+            {% elif tpl.category == 'ecommerce' %}🛒
+            {% elif tpl.category == 'blog' %}✍️
+            {% elif tpl.category == 'api' %}🔌
+            {% else %}📋{% endif %}
+          </div>
+          <div class="flex items-center gap-1.5">
+            {% if tpl.is_official %}
+            <span class="text-xs px-2 py-0.5 bg-accent text-white rounded-full font-medium">Oficial</span>
+            {% endif %}
+            <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">{{ tpl.stack_target }}</span>
+          </div>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-900 mb-1">{{ tpl.name }}</h3>
+        <p class="text-xs text-gray-400 line-clamp-3 mb-3">{{ tpl.description }}</p>
+        <div class="flex items-center gap-2 text-xs text-gray-400">
+          <span>{{ tpl.get_category_display }}</span>
+          <span>·</span>
+          <span>{{ tpl.use_count }} usos</span>
+        </div>
+      </div>
+      <div class="border-t border-gray-50 px-5 py-3">
+        <a href="/generate/?template={{ tpl.id }}"
+           class="w-full flex items-center justify-center gap-1.5 py-2 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors">
+          ⚡ Usar Template
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white rounded-xl border border-dashed border-gray-300 py-20 text-center">
+    <p class="text-gray-400 font-medium">Nenhum template disponível nesta categoria.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

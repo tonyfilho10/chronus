@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Django
+*.log
+*.pot
+db.sqlite3
+/media/
+/staticfiles/
+local_settings.py
+
+# Secrets — NUNCA subir para o repositório
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+service_account*.json
+credentials*.json
+secrets/
+
+# Docker
+.docker/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Node (Tailwind build)
+node_modules/
+package-lock.json
+
+# Celery
+celerybeat-schedule
+celerybeat.pid

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-gray-500 text-sm mt-0.5">Olá, {{ user.email }}</p>
+    </div>
+    <a href="/generate/"
+       class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-sm">
+      ⚡ Novo Prompt
+    </a>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Gerados este mês</p>
+      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.month_count }}</p>
+      <p class="text-xs text-gray-400 mt-1">de {{ user.monthly_quota }} disponíveis</p>
+      <div class="mt-2 h-1.5 bg-gray-100 rounded-full">
+        <div class="h-full bg-accent rounded-full transition-all"
+             style="width: {{ stats.quota_pct }}%"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Prompts salvos</p>
+      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.saved_count }}</p>
+      <p class="text-xs text-gray-400 mt-1">em {{ stats.collection_count }} coleções</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Tokens consumidos</p>
+      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.tokens_k }}k</p>
+      <p class="text-xs text-gray-400 mt-1">este mês</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Plano</p>
+      <p class="text-xl font-bold mt-1"
+         style="color: {% if user.plan == 'pro' %}#F97316{% elif user.plan == 'team' %}#10B981{% else %}#1E3A5F{% endif %}">
+        {{ user.plan|upper }}
+      </p>
+      {% if user.plan == 'free' %}
+      <a href="/settings/" class="text-xs text-accent font-medium hover:underline mt-1 block">Fazer upgrade →</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent prompts -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-800">Prompts recentes</h2>
+      <a href="/prompts/" class="text-xs text-accent font-medium hover:underline">Ver todos →</a>
+    </div>
+
+    {% if recent_prompts %}
+    <div class="divide-y divide-gray-50">
+      {% for prompt in recent_prompts %}
+      <a href="/prompts/{{ prompt.id }}/" class="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
+        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <span class="text-sm">⚡</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate group-hover:text-blue-900">{{ prompt.title }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ prompt.stack_target }} · {{ prompt.created_at|timesince }} atrás</p>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0
+          {% if prompt.complexity_score == 'critical' %}bg-red-100 text-red-700
+          {% elif prompt.complexity_score == 'high' %}bg-orange-100 text-orange-700
+          {% elif prompt.complexity_score == 'medium' %}bg-yellow-100 text-yellow-700
+          {% else %}bg-green-100 text-green-700{% endif %}">
+          {{ prompt.get_complexity_score_display|default:prompt.complexity_level|upper }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="py-12 text-center">
+      <p class="text-gray-400 text-sm">Nenhum prompt ainda.</p>
+      <a href="/generate/" class="text-accent text-sm font-medium hover:underline mt-1 inline-block">Criar o primeiro →</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

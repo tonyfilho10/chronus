@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Comunidade{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">🌐 Comunidade</h1>
+    <p class="text-gray-500 text-sm mt-1">Prompts públicos compartilhados pela comunidade CHRONUS.</p>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" class="flex flex-wrap gap-3 mb-6">
+    <input type="text" name="q" value="{{ request.GET.q }}"
+           placeholder="Buscar prompts..."
+           class="flex-1 min-w-48 text-sm border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-900 bg-white shadow-sm transition-colors">
+    <select name="stack" onchange="this.form.submit()"
+            class="text-sm border border-gray-200 rounded-xl px-3 py-2.5 bg-white shadow-sm focus:border-blue-900 outline-none">
+      <option value="">Todas as stacks</option>
+      {% for s in available_stacks %}
+      <option value="{{ s }}" {% if request.GET.stack == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit"
+            class="px-4 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-xl hover:bg-blue-800 transition-colors shadow-sm">
+      Filtrar
+    </button>
+  </form>
+
+  {% if prompts %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for prompt in prompts %}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <a href="/prompts/{{ prompt.id }}/" class="block p-5">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {{ prompt.user.email|first|upper }}
+            </div>
+            <span class="text-xs text-gray-500 truncate">{{ prompt.user.email }}</span>
+          </div>
+          <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-800 flex-shrink-0">
+            {{ prompt.stack_target }}
+          </span>
+        </div>
+        <h3 class="text-sm font-semibold text-gray-900 hover:text-blue-900 line-clamp-2 mb-1 transition-colors">
+          {{ prompt.title|default:"Sem título" }}
+        </h3>
+        <p class="text-xs text-gray-400 line-clamp-2 mb-3">{{ prompt.idea_input }}</p>
+        <div class="flex items-center justify-between text-xs text-gray-400">
+          <span>{{ prompt.created_at|date:"d/m/Y" }}</span>
+          <span>{{ prompt.token_count|default:0 }} tokens</span>
+        </div>
+      </a>
+
+      <!-- Upvote bar -->
+      <div class="border-t border-gray-50 px-5 py-2.5 flex items-center justify-between"
+           x-data="upvoteApp('{{ prompt.id }}', {{ prompt.upvotes.count }}, {% if prompt.id in user_upvotes %}true{% else %}false{% endif %})">
+        <button @click="toggle()"
+                :class="upvoted ? 'text-orange-500 font-semibold' : 'text-gray-400 hover:text-orange-500'"
+                class="flex items-center gap-1.5 text-sm transition-colors">
+          <span x-text="upvoted ? '🔥' : '🤍'"></span>
+          <span x-text="count"></span>
+        </button>
+        <button
+          hx-post="/api/prompts/{{ prompt.id }}/duplicate/"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-swap="none"
+          class="text-xs text-gray-400 hover:text-blue-900 font-medium transition-colors">
+          Clonar
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if prompts.has_other_pages %}
+  <div class="flex justify-center gap-2 mt-8">
+    {% if prompts.has_previous %}
+    <a href="?page={{ prompts.previous_page_number }}&q={{ request.GET.q }}"
+       class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:border-blue-900 hover:text-blue-900 transition-colors bg-white">← Anterior</a>
+    {% endif %}
+    <span class="px-4 py-2 text-sm text-white bg-blue-900 rounded-xl font-medium">
+      {{ prompts.number }} / {{ prompts.paginator.num_pages }}
+    </span>
+    {% if prompts.has_next %}
+    <a href="?page={{ prompts.next_page_number }}&q={{ request.GET.q }}"
+       class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-xl hover:border-blue-900 hover:text-blue-900 transition-colors bg-white">Próxima →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="bg-white rounded-xl border border-dashed border-gray-300 py-20 text-center">
+    <p class="text-gray-400 font-medium">Nenhum prompt público ainda.</p>
+    <p class="text-gray-400 text-sm mt-1">Publique seus prompts para aparecerem aqui.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function upvoteApp(promptId, initialCount, initialUpvoted) {
+  return {
+    count: initialCount,
+    upvoted: initialUpvoted,
+    async toggle() {
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+      const method = this.upvoted ? 'DELETE' : 'POST';
+      try {
+        const res = await fetch(`/api/community/${promptId}/upvote/`, {
+          method,
+          headers: { 'X-CSRFToken': csrf },
+        });
+        if (res.ok) {
+          this.upvoted = !this.upvoted;
+          this.count += this.upvoted ? 1 : -1;
+        }
+      } catch { showToast('Erro ao registrar upvote.', 'error'); }
+    }
+  };
+}
+</script>
+{% endblock %}

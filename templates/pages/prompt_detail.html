@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}{{ prompt.title|default:"Prompt" }}{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-gray-400 mb-5">
+    <a href="/prompts/" class="hover:text-blue-900">Prompts</a>
+    <span>/</span>
+    <span class="text-gray-700 font-medium truncate max-w-xs">{{ prompt.title|default:"Sem título" }}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900">{{ prompt.title|default:"Sem título" }}</h1>
+      <div class="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-400">
+        <span class="px-2 py-0.5 bg-blue-50 text-blue-800 rounded-full font-medium">{{ prompt.stack_target }}</span>
+        <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">{{ prompt.get_complexity_level_display }}</span>
+        {% if prompt.complexity_score %}
+        <span class="px-2 py-0.5 rounded-full font-medium
+          {% if prompt.complexity_score == 'critical' %}bg-red-100 text-red-700
+          {% elif prompt.complexity_score == 'high' %}bg-orange-100 text-orange-700
+          {% elif prompt.complexity_score == 'medium' %}bg-yellow-100 text-yellow-700
+          {% else %}bg-green-100 text-green-700{% endif %}">
+          {{ prompt.get_complexity_score_display }}
+        </span>
+        {% endif %}
+        <span>{{ prompt.token_count }} tokens</span>
+        <span>{{ prompt.created_at|date:"d/m/Y H:i" }}</span>
+        {% if prompt.is_public %}<span class="text-green-600">🌐 Público</span>{% else %}<span>🔒 Privado</span>{% endif %}
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-2">
+      <button onclick="copyContent()"
+              class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:border-blue-900 hover:text-blue-900 transition-colors bg-white shadow-sm">
+        📋 Copiar
+      </button>
+      <button onclick="downloadMd()"
+              class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:border-blue-900 hover:text-blue-900 transition-colors bg-white shadow-sm">
+        ⬇ .md
+      </button>
+      {% if user == prompt.user %}
+      <button
+        hx-post="/api/prompts/{{ prompt.id }}/publish/"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-swap="none"
+        class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-xl transition-colors shadow-sm
+          {% if prompt.is_public %}border-green-500 text-green-700 bg-green-50 hover:bg-green-100{% else %}border-gray-200 text-gray-600 bg-white hover:border-blue-900{% endif %}">
+        {% if prompt.is_public %}🌐 Publicado{% else %}Publicar{% endif %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Idea input card -->
+  <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5">
+    <p class="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Ideia original</p>
+    <p class="text-sm text-blue-900">{{ prompt.idea_input }}</p>
+  </div>
+
+  <!-- Content -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
+    <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+      <span class="text-sm font-semibold text-gray-700">Super Prompt Gerado</span>
+      <span class="text-xs text-gray-400">{{ prompt.sections.count }} seções</span>
+    </div>
+    <div id="prompt-content"
+         class="prose-chronus p-5 text-sm leading-relaxed overflow-x-auto">
+      {{ rendered_content }}
+    </div>
+  </div>
+
+  <!-- Refinement chat -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm"
+       x-data="refinementApp('{{ prompt.id }}')">
+    <div class="px-5 py-4 border-b border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-800">💬 Refinar Prompt</h2>
+      <p class="text-xs text-gray-400 mt-0.5">Peça ajustes ao CHRONUS. Ex: "Adicione Celery", "Use React no frontend".</p>
+    </div>
+
+    <!-- Chat messages -->
+    <div class="divide-y divide-gray-50 max-h-64 overflow-y-auto" x-ref="chatArea">
+      <template x-for="msg in messages" :key="msg.id">
+        <div :class="msg.role === 'user' ? 'bg-blue-50' : 'bg-white'" class="px-5 py-3">
+          <p class="text-xs font-semibold mb-1"
+             :class="msg.role === 'user' ? 'text-blue-700' : 'text-orange-600'"
+             x-text="msg.role === 'user' ? 'Você' : 'CHRONUS'"></p>
+          <p class="text-sm text-gray-700" x-text="msg.content"></p>
+        </div>
+      </template>
+    </div>
+
+    <div class="p-4 flex gap-2">
+      <input
+        x-model="message"
+        @keydown.enter="send()"
+        placeholder="Solicite ajustes ao prompt..."
+        class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-blue-900 transition-colors"
+        :disabled="loading"
+      >
+      <button @click="send()" :disabled="!message.trim() || loading"
+              class="px-4 py-2.5 bg-blue-900 text-white rounded-xl text-sm font-medium hover:bg-blue-800 disabled:opacity-50 transition-colors flex-shrink-0">
+        <span x-show="!loading">Enviar</span>
+        <span x-show="loading" class="animate-spin inline-block">⟳</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const rawContent = {{ raw_content|safe }};
+
+function copyContent() {
+  navigator.clipboard.writeText(rawContent)
+    .then(() => showToast('Copiado!', 'success'))
+    .catch(() => showToast('Erro ao copiar.', 'error'));
+}
+
+function downloadMd() {
+  const blob = new Blob([rawContent], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '{{ prompt.title|default:"super-prompt"|slugify }}.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function refinementApp(promptId) {
+  return {
+    promptId,
+    message: '',
+    loading: false,
+    messages: [],
+
+    async send() {
+      if (!this.message.trim() || this.loading) return;
+      const msg = this.message;
+      this.message = '';
+      this.messages.push({ id: Date.now(), role: 'user', content: msg });
+      this.loading = true;
+
+      try {
+        const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        const res = await fetch(`/api/prompts/${this.promptId}/refine/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json();
+        this.messages.push({ id: Date.now() + 1, role: 'assistant', content: data.response || 'Erro na resposta.' });
+        this.$nextTick(() => {
+          this.$refs.chatArea.scrollTop = this.$refs.chatArea.scrollHeight;
+        });
+      } catch {
+        showToast('Erro ao refinar.', 'error');
+      } finally {
+        this.loading = false;
+      }
+    }
+  };
+}
+</script>
+{% endblock %}
