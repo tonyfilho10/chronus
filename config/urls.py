@@ -29,6 +29,7 @@ urlpatterns = [
     path("community/", include("apps.community.urls")),
     path("templates/", include("apps.templates_library.urls")),
     path("settings/", include("apps.accounts.urls")),
+    path("tutorials/", include("apps.tutorials.urls")),
 ]
 
 if settings.DEBUG:

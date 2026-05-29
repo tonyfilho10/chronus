@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Acesso Restrito{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">
+  <div class="w-full max-w-md text-center">
+
+    <!-- Logo -->
+    <div class="flex items-center justify-center gap-2.5 mb-10">
+      <div class="w-10 h-10 rounded-xl bg-[#1E3A5F] flex items-center justify-center shadow">
+        <span class="text-[#F97316] font-black text-lg">C</span>
+      </div>
+      <span class="text-[#1E3A5F] font-bold text-2xl tracking-tight">CHRON<span class="text-[#F97316]">US</span></span>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10">
+      <div class="w-16 h-16 rounded-2xl bg-[#1E3A5F] flex items-center justify-center mx-auto mb-6 shadow-md">
+        <svg class="w-8 h-8 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+
+      <h1 class="text-xl font-bold text-slate-900 mb-2">Plataforma interna CSHUB</h1>
+      <p class="text-slate-500 text-sm leading-relaxed mb-6">
+        O CHRONUS é uma ferramenta exclusiva da equipe CSHUB.<br>
+        O cadastro é realizado pelo administrador do sistema.
+      </p>
+
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-left">
+        <p class="text-xs font-bold text-blue-700 uppercase tracking-wide mb-2">Para obter acesso</p>
+        <p class="text-sm text-blue-600 leading-relaxed">
+          Entre em contato com o administrador da equipe CSHUB para que seu usuário seja criado.
+        </p>
+      </div>
+
+      <a href="{% url 'account_login' %}"
+         class="btn-primary w-full py-3">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14"/>
+        </svg>
+        Voltar para o login
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

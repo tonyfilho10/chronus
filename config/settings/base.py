@@ -42,6 +42,7 @@ LOCAL_APPS = [
     "apps.community",
     "apps.exports",
     "apps.dashboard",
+    "apps.tutorials",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -126,8 +127,9 @@ AUTHENTICATION_BACKENDS = [
 
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "none"  # Admin cria usuários internamente — sem verificação por email
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_ALLOW_REGISTRATION = False  # Registro público desabilitado — somente admin cria usuários
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
