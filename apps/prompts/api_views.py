@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from apps.accounts.permissions import IsOwner, IsEmailVerified
 from .models import Prompt, RefinementSession
 from .serializers import PromptSerializer, PromptListSerializer, GeneratePromptSerializer
-from .services import PromptGenerationService, RefinementService, QuotaExceededError, LLMError
+from .services import PromptGenerationService, RefinementService, QuotaExceededError, LLMError, _META_PREFIX
 
 logger = logging.getLogger("apps.prompts")
 
@@ -100,7 +100,12 @@ def generate_stream_view(request):
                 complexity=complexity,
                 focus=focus,
             ):
-                yield _sse_event(chunk)
+                if chunk.startswith(_META_PREFIX):
+                    # Chunk especial com metadados (prompt_id, tokens) — envia como evento JSON
+                    meta_json = chunk[len(_META_PREFIX):]
+                    yield _sse_event(meta_json, "meta")
+                else:
+                    yield _sse_event(chunk)
             yield _sse_event("{}", "done")
         except QuotaExceededError as exc:
             yield _sse_event(json.dumps({"error": str(exc), "code": "quota_exceeded"}), "error")

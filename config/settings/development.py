@@ -32,6 +32,10 @@ SESSION_ENGINE = "django.contrib.sessions.backends.db"
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
+# Em desenvolvimento usa Haiku (resposta ~10s) para não exceder o timeout do browser SSE.
+# Em produção (production.py) o Sonnet 4.6 é usado normalmente.
+ANTHROPIC_MODEL_PRIMARY = "claude-haiku-4-5-20251001"
+
 # CSP relaxada em dev: permite Alpine.js (unsafe-eval) e Tailwind browser build
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {

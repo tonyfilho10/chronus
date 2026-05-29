@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from pathlib import Path
@@ -10,6 +11,12 @@ from apps.accounts.services import AccountService
 logger = logging.getLogger("apps.prompts")
 
 SYSTEM_PROMPT_PATH = Path(__file__).parent / "llm_prompts" / "system_v1.md"
+
+# Marcador especial para metadados no stream SSE
+_META_PREFIX = "__CHRONUS_META__:"
+
+# Tamanho dos chunks simulados (em caracteres)
+_CHUNK_SIZE = 80
 
 
 def _load_system_prompt() -> str:
@@ -34,7 +41,7 @@ class QuotaService:
 
 
 class PromptGenerationService:
-    """Orquestra a geração de Super Prompts via Claude API com streaming."""
+    """Orquestra a geração de Super Prompts via Claude API."""
 
     def __init__(self):
         self._client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
@@ -51,6 +58,26 @@ class PromptGenerationService:
             "Gere o Super Prompt completo com as 12 seções."
         )
 
+    def _call_claude(self, user_message: str, model: str) -> tuple[str, int]:
+        """Chama a API do Claude e retorna (texto_completo, total_tokens)."""
+        with self._client.messages.stream(
+            model=model,
+            max_tokens=8000,
+            system=[
+                {
+                    "type": "text",
+                    "text": self._system_prompt,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=[{"role": "user", "content": user_message}],
+        ) as stream:
+            # Coleta o texto completo antes de qualquer yield
+            text = stream.get_final_text()
+            final_msg = stream.get_final_message()
+            tokens = final_msg.usage.input_tokens + final_msg.usage.output_tokens
+            return text, tokens
+
     def generate_stream(
         self,
         user: User,
@@ -59,7 +86,12 @@ class PromptGenerationService:
         complexity: str = "complete",
         focus: list = None,
     ) -> Generator[str, None, None]:
-        """Gera o prompt via streaming. Yields chunks de texto."""
+        """
+        Estratégia: collect-then-stream.
+        1. Chama Claude de forma síncrona e coleta o texto completo.
+        2. Salva no banco (garante persistência antes de qualquer yield).
+        3. Faz o yield em chunks para simular streaming na UI.
+        """
         QuotaService.check_and_reserve(user)
 
         from apps.prompts.models import Prompt
@@ -73,34 +105,14 @@ class PromptGenerationService:
         )
 
         user_message = self._build_user_message(idea, stack, complexity, focus or [])
-        full_content = []
-        total_tokens = 0
         model = settings.ANTHROPIC_MODEL_PRIMARY
+        generated_text = ""
+        total_tokens = 0
 
         for attempt in range(settings.ANTHROPIC_MAX_RETRIES):
             try:
-                with self._client.messages.stream(
-                    model=model,
-                    max_tokens=8000,
-                    system=[
-                        {
-                            "type": "text",
-                            "text": self._system_prompt,
-                            "cache_control": {"type": "ephemeral"},
-                        }
-                    ],
-                    messages=[{"role": "user", "content": user_message}],
-                ) as stream:
-                    for chunk in stream.text_stream:
-                        full_content.append(chunk)
-                        yield chunk
-
-                    final_msg = stream.get_final_message()
-                    total_tokens = (
-                        final_msg.usage.input_tokens + final_msg.usage.output_tokens
-                    )
+                generated_text, total_tokens = self._call_claude(user_message, model)
                 break
-
             except anthropic.APIStatusError as exc:
                 logger.warning("Claude API error (attempt %d): %s", attempt + 1, exc)
                 if attempt == settings.ANTHROPIC_MAX_RETRIES - 1:
@@ -111,17 +123,36 @@ class PromptGenerationService:
                         draft.delete()
                         raise LLMError("Falha na geração após múltiplas tentativas.") from exc
                 time.sleep(2 ** attempt)
+            except Exception as exc:
+                logger.exception("Unexpected error during generation attempt %d", attempt + 1)
+                draft.delete()
+                raise LLMError("Erro inesperado na geração.") from exc
 
-        generated = "".join(full_content)
-        title = generated.split("\n")[0].lstrip("#= ").strip()[:100] or idea[:100]
+        if not generated_text:
+            draft.delete()
+            raise LLMError("Nenhum conteúdo gerado.")
 
-        draft.generated_content = generated
+        # ── Salva ANTES do primeiro yield ──────────────────────────────────────
+        title = (
+            generated_text.split("\n")[0].lstrip("#= ").strip()[:100]
+            or idea[:100]
+        )
+        draft.generated_content = generated_text
         draft.title = title
         draft.status = Prompt.Status.SAVED
         draft.token_count = total_tokens
-        draft.save(update_fields=["generated_content", "title", "status", "token_count", "updated_at"])
-
+        draft.save(
+            update_fields=["generated_content", "title", "status", "token_count", "updated_at"]
+        )
         AccountService.increment_usage(user, tokens=total_tokens)
+        logger.info("Prompt %s salvo com %d tokens, %d chars", draft.id, total_tokens, len(generated_text))
+
+        # ── Simula streaming via chunks ────────────────────────────────────────
+        for i in range(0, len(generated_text), _CHUNK_SIZE):
+            yield generated_text[i: i + _CHUNK_SIZE]
+
+        # Emite metadados como chunk especial
+        yield f"{_META_PREFIX}{json.dumps({'prompt_id': str(draft.id), 'tokens': total_tokens})}"
 
 
 class RefinementService:
@@ -181,7 +212,7 @@ class ExportService:
 </style>
 </head>
 <body>
-<div class="header"><h1>CHRONUS</h1><p>{prompt.title}</p></div>
+<div class="header"><h1>CHRONUS — CSHUB</h1><p>{prompt.title}</p></div>
 {html}
 </body>
 </html>"""

@@ -192,7 +192,24 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="CHRONUS <noreply@chronus.app>")
 
-ANTHROPIC_API_KEY = config("ANTHROPIC_API_KEY", default="")
+# Lê a chave diretamente do .env quando a variável de ambiente do OS está vazia
+# (python-decouple prioriza OS env, mesmo que seja string vazia)
+def _read_anthropic_key() -> str:
+    import os
+    from pathlib import Path
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if key:
+        return key
+    env_file = BASE_DIR / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("ANTHROPIC_API_KEY=") and not line.startswith("#"):
+                return line.split("=", 1)[1].strip()
+    return ""
+
+ANTHROPIC_API_KEY = _read_anthropic_key()
+del _read_anthropic_key
 ANTHROPIC_MODEL_PRIMARY = "claude-sonnet-4-6"
 ANTHROPIC_MODEL_FALLBACK = "claude-haiku-4-5-20251001"
 ANTHROPIC_REQUEST_TIMEOUT = 120
