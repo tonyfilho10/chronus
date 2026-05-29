@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: chronus
+    runtime: python
+    buildCommand: pip install -r requirements/production.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: PYTHON_VERSION
+        value: "3.12"
+    healthCheckPath: /api/schema/

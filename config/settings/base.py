@@ -1,12 +1,14 @@
+import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config("SECRET_KEY")
+# Usa os.environ primeiro (Railway/Docker), fallback para decouple (.env local)
+SECRET_KEY = os.environ.get("SECRET_KEY") or config("SECRET_KEY", default="")
 
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = os.environ.get("DEBUG", "").lower() in ("true", "1") or config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
@@ -73,6 +75,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.site_context",
             ],
         },
     },

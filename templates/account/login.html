@@ -70,18 +70,17 @@
       </div>
     </div>
 
-    <!-- Social proof -->
+    <!-- Team badge -->
     <div class="relative z-10">
       <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3">
-        <div class="flex -space-x-2">
-          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#fb923c,#ea580c)">A</div>
-          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">B</div>
-          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#34d399,#059669)">C</div>
-          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">D</div>
+        <div class="w-9 h-9 rounded-lg bg-[#F97316]/20 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
         </div>
         <div>
-          <p class="text-white text-xs font-semibold">+2.400 desenvolvedores</p>
-          <p class="text-blue-300 text-[11px]">já usam o CHRONUS</p>
+          <p class="text-white text-xs font-semibold">{{ user_count }} membro{{ user_count|pluralize:"s" }} na equipe CSHUB</p>
+          <p class="text-blue-300 text-[11px]">Plataforma interna exclusiva</p>
         </div>
       </div>
     </div>
@@ -165,22 +164,16 @@
         <div class="flex-1 h-px bg-slate-200"></div>
       </div>
 
-      <!-- Register CTA -->
-      <p class="text-center text-sm text-slate-500">
-        Não tem uma conta?
-        <a href="{% url 'account_signup' %}" class="text-[#1E3A5F] font-semibold hover:text-[#F97316] transition-colors ml-1">
-          Cadastre-se grátis →
-        </a>
-      </p>
-
-      <!-- Free plan badge -->
-      <div class="mt-8 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-3.5 flex items-center gap-3">
+      <!-- CSHUB internal notice -->
+      <div class="mt-6 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-3.5 flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
         </div>
         <div>
-          <p class="text-[#1E3A5F] text-xs font-bold">Plano Free incluso</p>
-          <p class="text-slate-500 text-xs mt-0.5">10 gerações/mês sem precisar de cartão</p>
+          <p class="text-[#1E3A5F] text-xs font-bold">Plataforma interna CSHUB</p>
+          <p class="text-slate-500 text-xs mt-0.5">Acesso restrito à equipe. Contate o administrador.</p>
         </div>
       </div>
 
