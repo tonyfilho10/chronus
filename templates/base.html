@@ -319,8 +319,8 @@
         </a>
 
         <!-- User menu -->
-        <div class="relative" x-data="{ open: false }">
-          <button @click="open = !open" @click.outside="open = false"
+        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+          <button @click="open = !open"
                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
             {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="{{ user.email|first|upper }}"
