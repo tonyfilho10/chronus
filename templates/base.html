@@ -337,7 +337,7 @@
           </button>
 
           <div id="user-menu-dropdown"
-               class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl shadow-slate-200 border border-slate-100 py-1.5 z-50">
+               style="display:none;position:absolute;right:0;top:100%;margin-top:8px;width:192px;background:#fff;border-radius:12px;box-shadow:0 20px 40px -10px rgba(30,58,95,0.15);border:1px solid #F1F5F9;padding:6px 0;z-index:50;">
             <a href="/dashboard/" class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
               Dashboard
@@ -404,18 +404,18 @@
   <main>{% block content %}{% endblock %}</main>
 
   <script>
-    // Dropdown do usuário — vanilla JS (funciona com qualquer CSP)
+    // Dropdown do usuário — vanilla JS com style.display (imune a CSS overrides)
     function toggleUserMenu() {
       const menu = document.getElementById('user-menu-dropdown');
       if (!menu) return;
-      menu.classList.toggle('hidden');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
     }
 
     document.addEventListener('click', function(e) {
       const wrapper = document.getElementById('user-menu-wrapper');
       const menu = document.getElementById('user-menu-dropdown');
       if (wrapper && menu && !wrapper.contains(e.target)) {
-        menu.classList.add('hidden');
+        menu.style.display = 'none';
       }
     });
 
