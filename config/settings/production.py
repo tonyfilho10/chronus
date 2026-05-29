@@ -11,6 +11,20 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
 ] + [h.strip() for h in _extra_hosts.split(",") if h.strip()]
 
+# ── Proxy (Railway usa HTTPS no edge, HTTP internamente) ───
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# ── CSRF trusted origins ────────────────────────────────────
+_extra_hosts = config("ALLOWED_HOSTS", default="")
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.railway.app",
+    "https://*.up.railway.app",
+] + [
+    f"https://{h.strip()}" for h in _extra_hosts.split(",")
+    if h.strip() and not h.strip().startswith(".")
+]
+
 # ── Segurança ──────────────────────────────────────────────
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
