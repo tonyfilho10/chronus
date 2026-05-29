@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" x-data="appShell()">
+<html lang="pt-BR" x-data="appShell()" :class="darkMode ? 'dark' : ''">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,11 +25,72 @@
     body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
 
+    /* ── Dark mode via CSS variables ─────────────────────────────── */
+    :root {
+      --bg-page:    #F8FAFC;
+      --bg-card:    #FFFFFF;
+      --bg-card2:   #F8FAFC;
+      --bg-input:   #FAFBFC;
+      --text-main:  #1A1A2E;
+      --text-muted: #64748B;
+      --border:     #E2E8F0;
+      --border2:    #F1F5F9;
+    }
+    html.dark {
+      --bg-page:    #0F172A;
+      --bg-card:    #1E293B;
+      --bg-card2:   #162032;
+      --bg-input:   #253047;
+      --text-main:  #E2E8F0;
+      --text-muted: #94A3B8;
+      --border:     #2D3F55;
+      --border2:    #1E293B;
+    }
+    body            { background-color: var(--bg-page); color: var(--text-main); }
+    .card-auto      { background: var(--bg-card); border-color: var(--border); }
+    .card-auto2     { background: var(--bg-card2); border-color: var(--border); }
+    .text-auto      { color: var(--text-main); }
+    .text-muted-auto{ color: var(--text-muted); }
+    .border-auto    { border-color: var(--border); }
+    .input-field    { background: var(--bg-input); color: var(--text-main); border-color: var(--border); }
+    .input-field:focus { background: var(--bg-card); border-color: #1E3A5F; }
+
+    /* White → card in dark mode for common patterns */
+    html.dark .bg-white          { background-color: var(--bg-card) !important; }
+    html.dark .bg-\\[\\#F8FAFC\\]  { background-color: var(--bg-page) !important; }
+    html.dark .bg-slate-50       { background-color: #1a2742 !important; }
+    html.dark .bg-slate-100      { background-color: #253047 !important; }
+    html.dark .border-slate-100  { border-color: var(--border) !important; }
+    html.dark .border-slate-200  { border-color: var(--border) !important; }
+    html.dark .text-slate-900    { color: #E2E8F0 !important; }
+    html.dark .text-slate-800    { color: #CBD5E1 !important; }
+    html.dark .text-slate-700    { color: #B0BFCC !important; }
+    html.dark .text-slate-600    { color: #94A3B8 !important; }
+    html.dark .text-slate-500    { color: #7F8EA3 !important; }
+    html.dark .text-slate-400    { color: #64748B !important; }
+    html.dark .text-gray-900     { color: #E2E8F0 !important; }
+    html.dark .text-gray-600     { color: #94A3B8 !important; }
+    html.dark .text-gray-400     { color: #64748B !important; }
+    html.dark .bg-gray-50        { background-color: #1a2742 !important; }
+    html.dark .bg-blue-50        { background-color: #1a2a40 !important; }
+    html.dark .bg-\\[\\#EFF6FF\\]  { background-color: #1a2a40 !important; }
+    html.dark .shadow-sm         { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
+    html.dark .divide-slate-50 > * + * { border-color: var(--border) !important; }
+    html.dark .divide-gray-50 > * + * { border-color: var(--border) !important; }
+    html.dark .prose-chronus     { color: #CBD5E1; }
+    html.dark .prose-chronus h1  { color: #93C5FD; border-color: #F97316; }
+    html.dark .prose-chronus h2  { color: #93C5FD; border-color: #F97316; }
+    html.dark .prose-chronus h3  { color: #60A5FA; }
+    html.dark .prose-chronus code { background: #253047; color: #93C5FD; border-color: #2D3F55; }
+    html.dark .prose-chronus pre  { background: #0D1B2E; border-color: #1E3A5F; }
+    html.dark .prose-chronus strong { color: #93C5FD; }
+
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
     ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+    html.dark ::-webkit-scrollbar-thumb { background: #2D3F55; }
 
     /* Streaming cursor */
     .streaming::after { content: '▋'; animation: blink 0.9s step-end infinite; color: #F97316; }
@@ -238,6 +299,18 @@
 
       <!-- Right side -->
       <div class="flex items-center gap-2">
+        <!-- Dark mode toggle -->
+        <button @click="toggleDark()"
+                class="w-8 h-8 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center text-white/70 hover:text-white"
+                :title="darkMode ? 'Modo claro' : 'Modo escuro'">
+          <svg x-show="!darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+          <svg x-show="darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </button>
+
         <!-- New prompt CTA -->
         <a href="/generate/"
            class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 bg-[#F97316] hover:bg-[#EA6A0A] text-white text-xs font-bold rounded-lg transition-colors shadow-sm shadow-orange-500/30">
@@ -249,9 +322,14 @@
         <div class="relative" x-data="{ open: false }">
           <button @click="open = !open" @click.outside="open = false"
                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.email|first|upper }}"
+                 class="w-7 h-7 rounded-full object-cover shadow-sm border border-white/20">
+            {% else %}
             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
               {{ user.email|first|upper }}
             </div>
+            {% endif %}
             <span class="hidden lg:block text-white/80 text-xs font-medium max-w-[100px] truncate">{{ user.email }}</span>
             <svg class="w-3 h-3 text-white/50 hidden lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -331,7 +409,23 @@
 
   <script>
     function appShell() {
-      return { mobileMenu: false };
+      const saved = localStorage.getItem('chronus-dark');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved !== null ? saved === 'true' : prefersDark;
+      return {
+        mobileMenu: false,
+        darkMode: isDark,
+        toggleDark() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('chronus-dark', this.darkMode);
+        },
+        init() {
+          // Sync on system preference change
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (localStorage.getItem('chronus-dark') === null) this.darkMode = e.matches;
+          });
+        }
+      };
     }
 
     function toastManager() {

@@ -36,10 +36,15 @@
         <div class="flex items-center gap-2.5 mb-4">
           <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                style="background: linear-gradient(135deg, #F97316, #EA6A0A)">
+            {% if prompt.user.avatar %}
+            <img src="{{ prompt.user.avatar.url }}" alt="{{ prompt.user.email|first|upper }}"
+                 class="w-full h-full object-cover">
+            {% else %}
             {{ prompt.user.email|first|upper }}
+            {% endif %}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-slate-600 truncate">{{ prompt.user.email }}</p>
+            <p class="text-xs font-semibold text-slate-600 truncate">{{ prompt.user.username|default:prompt.user.email }}</p>
             <p class="text-[11px] text-slate-400">{{ prompt.created_at|timesince }} atrás</p>
           </div>
           <span class="badge bg-blue-50 text-blue-700 flex-shrink-0">{{ prompt.stack_target }}</span>

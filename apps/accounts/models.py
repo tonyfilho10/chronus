@@ -8,6 +8,14 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     avatar_url = models.URLField(blank=True)
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+
+    @property
+    def avatar_src(self):
+        """Retorna a URL do avatar — imagem enviada ou URL externa."""
+        if self.avatar:
+            return self.avatar.url
+        return self.avatar_url or ""
     is_public = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
