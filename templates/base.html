@@ -209,6 +209,11 @@
         </div>
         <span class="text-white font-bold text-base tracking-tight">CHRON<span class="text-[#F97316]">US</span></span>
         <span class="hidden lg:block text-[10px] text-blue-300 font-medium bg-white/10 px-2 py-0.5 rounded-full">Prompt Engine AI</span>
+        <!-- CSHUB org badge -->
+        <span class="hidden xl:flex items-center gap-1 ml-1 text-[10px] font-bold text-[#F97316] bg-[#F97316]/10 border border-[#F97316]/20 px-2 py-0.5 rounded-full tracking-wide">
+          <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z"/></svg>
+          CSHUB
+        </span>
       </a>
 
       <!-- Desktop center nav -->
@@ -351,6 +356,39 @@
 
     document.body.addEventListener('htmx:configRequest', (e) => {
       e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+
+    // Toasts automáticos para respostas HTMX
+    document.body.addEventListener('htmx:afterRequest', (e) => {
+      const xhr = e.detail.xhr;
+      const method = e.detail.requestConfig?.verb?.toUpperCase() || '';
+      const url = e.detail.requestConfig?.path || '';
+      const ok = e.detail.successful;
+
+      if (!ok) {
+        showToast('Erro na operação. Tente novamente.', 'error');
+        return;
+      }
+
+      if (method === 'DELETE' && url.includes('/api/prompts/')) {
+        showToast('Prompt movido para lixeira.', 'success');
+      } else if (method === 'POST' && url.includes('/duplicate/')) {
+        showToast('Prompt duplicado com sucesso!', 'success');
+      } else if (method === 'POST' && url.includes('/publish/')) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          const msg = data.is_public ? 'Prompt publicado na comunidade.' : 'Prompt despublicado.';
+          showToast(msg, 'success');
+        } catch { showToast('Visibilidade alterada.', 'success'); }
+      } else if (method === 'POST' && url.includes('/upvote/')) {
+        showToast('Upvote registrado!', 'success');
+      } else if (method === 'DELETE' && url.includes('/upvote/')) {
+        showToast('Upvote removido.', 'info');
+      }
+    });
+
+    document.body.addEventListener('htmx:responseError', () => {
+      showToast('Erro na requisição. Tente novamente.', 'error');
     });
   </script>
 

@@ -16,8 +16,7 @@ if _db_host in ("localhost", "127.0.0.1", ""):
             "NAME": BASE_DIR / "db.sqlite3",  # noqa
         }
     }
-else:
-    DATABASES["default"]["OPTIONS"]["sslmode"] = "disable"  # noqa
+# Para hosts externos (Supabase), o sslmode já vem correto do .env via base.py
 
 # Cache e sessão sem Redis em dev local
 CACHES = {
