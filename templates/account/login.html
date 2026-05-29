@@ -2,61 +2,190 @@
 {% block title %}Entrar{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-  <div class="w-full max-w-sm">
+<div class="min-h-screen flex">
+
+  <!-- LEFT — Branding panel (hidden on mobile) -->
+  <div class="hidden lg:flex lg:w-[52%] bg-[#1E3A5F] relative overflow-hidden flex-col justify-between p-12">
+    <!-- Background pattern -->
+    <div class="absolute inset-0 opacity-[0.04]"
+         style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+    <!-- Gradient orbs -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-[#F97316] opacity-10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-16 w-80 h-80 bg-blue-400 opacity-10 rounded-full blur-3xl"></div>
 
     <!-- Logo -->
-    <div class="text-center mb-8">
-      <a href="/" class="inline-block">
-        <span class="text-4xl font-bold text-blue-900">CHRON<span class="text-accent">US</span></span>
-      </a>
-      <p class="text-gray-500 text-sm mt-2">Prompt Engine AI</p>
+    <div class="relative z-10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[#F97316] flex items-center justify-center shadow-lg shadow-orange-500/30">
+          <span class="text-white font-black text-lg tracking-tighter">C</span>
+        </div>
+        <div>
+          <span class="text-white font-bold text-2xl tracking-tight">CHRON<span class="text-[#F97316]">US</span></span>
+          <p class="text-blue-300 text-xs font-medium">Prompt Engine AI</p>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
-      <h1 class="text-xl font-bold text-gray-900 mb-6 text-center">Entrar na conta</h1>
+    <!-- Main copy -->
+    <div class="relative z-10 flex-1 flex flex-col justify-center py-12">
+      <h1 class="text-4xl font-bold text-white leading-snug mb-4">
+        De ideia a<br>
+        <span class="text-[#F97316]">Super Prompt</span><br>
+        em segundos.
+      </h1>
+      <p class="text-blue-200 text-base leading-relaxed mb-10 max-w-sm">
+        O CHRONUS transforma sua ideia de aplicativo em uma especificação técnica completa, pronta para qualquer IA de desenvolvimento.
+      </p>
 
-      <form method="post" class="space-y-4">
-        {% csrf_token %}
-        {% for field in form %}
+      <!-- Feature list -->
+      <div class="flex flex-col gap-4">
+        {% for feature in ""|center:0|slice:":3" %}{% endfor %}
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Geração em tempo real</p>
+            <p class="text-blue-300 text-xs mt-0.5">Streaming SSE com 12 seções estruturadas via Claude API</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Arquitetura enterprise</p>
+            <p class="text-blue-300 text-xs mt-0.5">Clean Architecture, SOLID, Docker, CI/CD incluídos</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Export MD · TXT · PDF</p>
+            <p class="text-blue-300 text-xs mt-0.5">Compartilhe ou use diretamente no Claude, Cursor, GPT-4</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social proof -->
+    <div class="relative z-10">
+      <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3">
+        <div class="flex -space-x-2">
+          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#fb923c,#ea580c)">A</div>
+          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#60a5fa,#2563eb)">B</div>
+          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#34d399,#059669)">C</div>
+          <div class="w-7 h-7 rounded-full border-2 border-[#1E3A5F] flex items-center justify-center text-white text-[10px] font-bold" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">D</div>
+        </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+          <p class="text-white text-xs font-semibold">+2.400 desenvolvedores</p>
+          <p class="text-blue-300 text-[11px]">já usam o CHRONUS</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — Auth form -->
+  <div class="flex-1 flex items-center justify-center px-6 py-12 bg-[#F8FAFC]">
+    <div class="w-full max-w-[380px]">
+
+      <!-- Mobile logo -->
+      <div class="lg:hidden text-center mb-10">
+        <div class="inline-flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#1E3A5F] flex items-center justify-center shadow">
+            <span class="text-[#F97316] font-black text-base">C</span>
+          </div>
+          <span class="text-[#1E3A5F] font-bold text-2xl tracking-tight">CHRON<span class="text-[#F97316]">US</span></span>
+        </div>
+      </div>
+
+      <!-- Form header -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-900">Bem-vindo de volta</h2>
+        <p class="text-slate-500 text-sm mt-1">Entre na sua conta para continuar</p>
+      </div>
+
+      <!-- Login form -->
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        {% for field in form %}
+        {% if field.html_name != 'remember' %}
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">{{ field.label }}</label>
           <input
             type="{{ field.field.widget.input_type }}"
             name="{{ field.html_name }}"
             {% if field.value %}value="{{ field.value }}"{% endif %}
-            class="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-900 transition-colors"
+            class="input-field"
             {% if field.field.required %}required{% endif %}
+            {% if field.html_name == 'login' %}placeholder="seu@email.com" autocomplete="email"{% endif %}
+            {% if field.html_name == 'password' %}placeholder="••••••••" autocomplete="current-password"{% endif %}
           >
           {% if field.errors %}
-          <p class="text-red-500 text-xs mt-1">{{ field.errors|join:", " }}</p>
+          <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            {{ field.errors|join:", " }}
+          </p>
           {% endif %}
         </div>
+        {% endif %}
         {% endfor %}
 
         {% if form.non_field_errors %}
-        <div class="bg-red-50 border border-red-200 rounded-xl p-3">
-          <p class="text-red-600 text-sm">{{ form.non_field_errors|join:", " }}</p>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3.5 flex items-start gap-2.5">
+          <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+          <p class="text-red-700 text-sm">{{ form.non_field_errors|join:", " }}</p>
         </div>
         {% endif %}
 
-        <button type="submit"
-                class="w-full py-3 bg-accent text-white font-bold rounded-xl hover:bg-orange-600 active:scale-95 transition-all mt-2">
+        <!-- Remember + forgot -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 accent-[#1E3A5F]">
+            <span class="text-sm text-slate-600">Lembrar de mim</span>
+          </label>
+          <a href="{% url 'account_reset_password' %}" class="text-sm text-[#1E3A5F] font-medium hover:text-[#F97316] transition-colors">
+            Esqueceu a senha?
+          </a>
+        </div>
+
+        <button type="submit" class="btn-primary w-full py-3.5 text-base mt-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
           Entrar
         </button>
       </form>
 
-      <div class="mt-4 text-center">
-        <a href="{% url 'account_signup' %}" class="text-sm text-blue-900 hover:underline">
-          Não tem conta? Cadastre-se
-        </a>
+      <!-- Divider -->
+      <div class="flex items-center gap-3 my-6">
+        <div class="flex-1 h-px bg-slate-200"></div>
+        <span class="text-xs text-slate-400 font-medium">ou</span>
+        <div class="flex-1 h-px bg-slate-200"></div>
       </div>
-      <div class="mt-2 text-center">
-        <a href="{% url 'account_reset_password' %}" class="text-xs text-gray-400 hover:text-gray-600">
-          Esqueceu a senha?
+
+      <!-- Register CTA -->
+      <p class="text-center text-sm text-slate-500">
+        Não tem uma conta?
+        <a href="{% url 'account_signup' %}" class="text-[#1E3A5F] font-semibold hover:text-[#F97316] transition-colors ml-1">
+          Cadastre-se grátis →
         </a>
+      </p>
+
+      <!-- Free plan badge -->
+      <div class="mt-8 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl p-3.5 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <p class="text-[#1E3A5F] text-xs font-bold">Plano Free incluso</p>
+          <p class="text-slate-500 text-xs mt-0.5">10 gerações/mês sem precisar de cartão</p>
+        </div>
       </div>
+
     </div>
   </div>
+
 </div>
 {% endblock %}

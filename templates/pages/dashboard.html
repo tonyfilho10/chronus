@@ -2,91 +2,202 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p class="text-gray-500 text-sm mt-0.5">Olá, {{ user.email }}</p>
+      <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Olá, <span class="font-medium text-[#1E3A5F]">{{ user.email }}</span></p>
     </div>
     <a href="/generate/"
-       class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-sm">
-      ⚡ Novo Prompt
+       class="btn-primary self-start sm:self-auto">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Gerar Novo Prompt
     </a>
   </div>
 
-  <!-- Stats cards -->
+  <!-- Stats grid -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Gerados este mês</p>
-      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.month_count }}</p>
-      <p class="text-xs text-gray-400 mt-1">de {{ user.monthly_quota }} disponíveis</p>
-      <div class="mt-2 h-1.5 bg-gray-100 rounded-full">
-        <div class="h-full bg-accent rounded-full transition-all"
+
+    <!-- Gerados este mês -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Gerados este mês</p>
+        <div class="w-8 h-8 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#1E3A5F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+      </div>
+      <div>
+        <p class="text-3xl font-bold text-slate-900">{{ stats.month_count }}</p>
+        <p class="text-xs text-slate-400 mt-1">de {{ user.monthly_quota }} disponíveis</p>
+      </div>
+      <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-[#1E3A5F] to-blue-500 rounded-full transition-all"
              style="width: {{ stats.quota_pct }}%"></div>
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Prompts salvos</p>
-      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.saved_count }}</p>
-      <p class="text-xs text-gray-400 mt-1">em {{ stats.collection_count }} coleções</p>
+    <!-- Prompts salvos -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Salvos</p>
+        <div class="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+        </div>
+      </div>
+      <div>
+        <p class="text-3xl font-bold text-slate-900">{{ stats.saved_count }}</p>
+        <p class="text-xs text-slate-400 mt-1">em {{ stats.collection_count }} coleções</p>
+      </div>
+      <a href="/prompts/" class="text-xs text-[#F97316] font-semibold hover:underline">Ver todos →</a>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Tokens consumidos</p>
-      <p class="text-3xl font-bold text-blue-900 mt-1">{{ stats.tokens_k }}k</p>
-      <p class="text-xs text-gray-400 mt-1">este mês</p>
+    <!-- Tokens -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Tokens</p>
+        <div class="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+        </div>
+      </div>
+      <div>
+        <p class="text-3xl font-bold text-slate-900">{{ stats.tokens_k }}k</p>
+        <p class="text-xs text-slate-400 mt-1">consumidos este mês</p>
+      </div>
+      <p class="text-xs text-slate-400">Claude Sonnet 4.6</p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Plano</p>
-      <p class="text-xl font-bold mt-1"
-         style="color: {% if user.plan == 'pro' %}#F97316{% elif user.plan == 'team' %}#10B981{% else %}#1E3A5F{% endif %}">
-        {{ user.plan|upper }}
-      </p>
+    <!-- Plano -->
+    <div class="rounded-2xl p-5 flex flex-col gap-3 relative overflow-hidden
+      {% if user.plan == 'pro' %}bg-gradient-to-br from-[#1E3A5F] to-blue-700{% elif user.plan == 'team' %}bg-gradient-to-br from-emerald-600 to-teal-700{% else %}bg-white border border-slate-100{% endif %}">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-semibold uppercase tracking-wide {% if user.plan != 'free' %}text-white/60{% else %}text-slate-400{% endif %}">Plano</p>
+        <div class="w-8 h-8 rounded-xl {% if user.plan != 'free' %}bg-white/20{% else %}bg-violet-50{% endif %} flex items-center justify-center">
+          <svg class="w-4 h-4 {% if user.plan != 'free' %}text-white{% else %}text-violet-600{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+        </div>
+      </div>
+      <div>
+        <p class="text-2xl font-bold {% if user.plan != 'free' %}text-white{% else %}text-slate-900{% endif %}">
+          {{ user.plan|upper }}
+        </p>
+        <p class="text-xs mt-1 {% if user.plan != 'free' %}text-white/60{% else %}text-slate-400{% endif %}">
+          {% if user.plan == 'free' %}10 gerações/mês{% elif user.plan == 'pro' %}Ilimitado + PDF{% else %}Multi-usuário{% endif %}
+        </p>
+      </div>
       {% if user.plan == 'free' %}
-      <a href="/settings/" class="text-xs text-accent font-medium hover:underline mt-1 block">Fazer upgrade →</a>
+      <a href="/settings/" class="text-xs text-[#F97316] font-bold hover:underline">Upgrade para Pro →</a>
+      {% else %}
+      <p class="text-xs text-white/50">Ativo</p>
       {% endif %}
     </div>
+
   </div>
 
-  <!-- Recent prompts -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-      <h2 class="text-sm font-semibold text-gray-800">Prompts recentes</h2>
-      <a href="/prompts/" class="text-xs text-accent font-medium hover:underline">Ver todos →</a>
+  <!-- Main content grid -->
+  <div class="grid lg:grid-cols-3 gap-6">
+
+    <!-- Recent prompts (2/3) -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-50">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-[#F97316]"></div>
+          <h2 class="text-sm font-bold text-slate-800">Prompts Recentes</h2>
+        </div>
+        <a href="/prompts/" class="text-xs text-[#F97316] font-semibold hover:underline transition-colors">Ver todos →</a>
+      </div>
+
+      {% if recent_prompts %}
+      <div class="divide-y divide-slate-50">
+        {% for prompt in recent_prompts %}
+        <a href="/prompts/{{ prompt.id }}/"
+           class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/60 transition-colors group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1E3A5F] to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-200">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-800 truncate group-hover:text-[#1E3A5F] transition-colors">
+              {{ prompt.title|default:"Sem título" }}
+            </p>
+            <p class="text-xs text-slate-400 mt-0.5 truncate">{{ prompt.idea_input|truncatechars:60 }}</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="badge bg-blue-50 text-blue-700">{{ prompt.stack_target }}</span>
+            <span class="text-xs text-slate-300 hidden sm:block">{{ prompt.created_at|timesince }} atrás</span>
+            <svg class="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-16 flex flex-col items-center text-center px-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <p class="text-slate-500 font-semibold text-sm">Nenhum prompt ainda</p>
+        <p class="text-slate-400 text-xs mt-1 mb-4">Gere seu primeiro Super Prompt agora</p>
+        <a href="/generate/" class="btn-primary text-sm py-2 px-4">⚡ Gerar agora</a>
+      </div>
+      {% endif %}
     </div>
 
-    {% if recent_prompts %}
-    <div class="divide-y divide-gray-50">
-      {% for prompt in recent_prompts %}
-      <a href="/prompts/{{ prompt.id }}/" class="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
-        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-          <span class="text-sm">⚡</span>
+    <!-- Quick actions (1/3) -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Quick start -->
+      <div class="bg-gradient-to-br from-[#1E3A5F] to-blue-700 rounded-2xl p-5 text-white relative overflow-hidden">
+        <div class="absolute -top-6 -right-6 w-24 h-24 bg-white/5 rounded-full"></div>
+        <div class="absolute -bottom-4 -left-4 w-16 h-16 bg-[#F97316]/20 rounded-full"></div>
+        <div class="relative z-10">
+          <div class="w-9 h-9 rounded-xl bg-[#F97316] flex items-center justify-center mb-4 shadow-lg shadow-orange-500/30">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="font-bold text-base mb-1">Pronto para gerar?</h3>
+          <p class="text-blue-200 text-xs leading-relaxed mb-4">Descreva sua ideia e receba um Super Prompt técnico completo em segundos.</p>
+          <a href="/generate/" class="inline-flex items-center gap-2 bg-white text-[#1E3A5F] text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-blue-50 transition-colors">
+            Começar agora →
+          </a>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900 truncate group-hover:text-blue-900">{{ prompt.title }}</p>
-          <p class="text-xs text-gray-400 mt-0.5">{{ prompt.stack_target }} · {{ prompt.created_at|timesince }} atrás</p>
-        </div>
-        <span class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0
-          {% if prompt.complexity_score == 'critical' %}bg-red-100 text-red-700
-          {% elif prompt.complexity_score == 'high' %}bg-orange-100 text-orange-700
-          {% elif prompt.complexity_score == 'medium' %}bg-yellow-100 text-yellow-700
-          {% else %}bg-green-100 text-green-700{% endif %}">
-          {{ prompt.get_complexity_score_display|default:prompt.complexity_level|upper }}
-        </span>
-      </a>
-      {% endfor %}
+      </div>
+
+      <!-- Quick nav cards -->
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-1">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2 px-2">Acesso rápido</p>
+
+        <a href="/prompts/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 group transition-colors">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-[#1E3A5F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Meus Prompts</span>
+          <svg class="w-4 h-4 text-slate-300 ml-auto group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="/templates/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 group transition-colors">
+          <div class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Templates</span>
+          <svg class="w-4 h-4 text-slate-300 ml-auto group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="/community/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 group transition-colors">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Comunidade</span>
+          <svg class="w-4 h-4 text-slate-300 ml-auto group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="/settings/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 group transition-colors">
+          <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+          </div>
+          <span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Configurações</span>
+          <svg class="w-4 h-4 text-slate-300 ml-auto group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
     </div>
-    {% else %}
-    <div class="py-12 text-center">
-      <p class="text-gray-400 text-sm">Nenhum prompt ainda.</p>
-      <a href="/generate/" class="text-accent text-sm font-medium hover:underline mt-1 inline-block">Criar o primeiro →</a>
-    </div>
-    {% endif %}
+
   </div>
-
 </div>
 {% endblock %}
