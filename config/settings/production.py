@@ -77,6 +77,18 @@ LOGGING = {
 }
 
 # ── Sentry (opcional) ──────────────────────────────────────
+# ── CSP (permite Alpine.js + Tailwind browser) ─────────────
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": ("'self'", "'unsafe-eval'", "'unsafe-inline'", "unpkg.com", "cdn.jsdelivr.net"),
+        "style-src": ("'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdn.jsdelivr.net"),
+        "font-src": ("'self'", "fonts.gstatic.com"),
+        "img-src": ("'self'", "data:", "lh3.googleusercontent.com", "media"),
+        "connect-src": ("'self'",),
+    }
+}
+
 _sentry_dsn = config("SENTRY_DSN", default="")
 if _sentry_dsn:
     import sentry_sdk

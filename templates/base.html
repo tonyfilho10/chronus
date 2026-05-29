@@ -319,8 +319,8 @@
         </a>
 
         <!-- User menu -->
-        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-          <button @click="open = !open"
+        <div class="relative" id="user-menu-wrapper">
+          <button onclick="toggleUserMenu()"
                   class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
             {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="{{ user.email|first|upper }}"
@@ -336,12 +336,8 @@
             </svg>
           </button>
 
-          <div x-show="open" x-transition:enter="transition ease-out duration-150"
-               x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
-               x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-               x-transition:leave="transition ease-in duration-100"
-               x-transition:leave-end="opacity-0 scale-95"
-               class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl shadow-slate-200 border border-slate-100 py-1.5 z-50">
+          <div id="user-menu-dropdown"
+               class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl shadow-slate-200 border border-slate-100 py-1.5 z-50">
             <a href="/dashboard/" class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
               <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
               Dashboard
@@ -408,6 +404,21 @@
   <main>{% block content %}{% endblock %}</main>
 
   <script>
+    // Dropdown do usuário — vanilla JS (funciona com qualquer CSP)
+    function toggleUserMenu() {
+      const menu = document.getElementById('user-menu-dropdown');
+      if (!menu) return;
+      menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('user-menu-wrapper');
+      const menu = document.getElementById('user-menu-dropdown');
+      if (wrapper && menu && !wrapper.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
     function appShell() {
       const saved = localStorage.getItem('chronus-dark');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
